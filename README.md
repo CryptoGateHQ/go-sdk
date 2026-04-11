@@ -5,7 +5,7 @@ Official Go SDK for the [CryptoGate](https://cryptogate.live) payment API.
 ## Installation
 
 ```bash
-go get github.com/cryptogate/go-sdk
+go get github.com/CryptoGateHQ/go-sdk
 ```
 
 ## Quick Start
@@ -16,7 +16,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/cryptogate/go-sdk"
+    "github.com/CryptoGateHQ/go-sdk"
 )
 
 func main() {

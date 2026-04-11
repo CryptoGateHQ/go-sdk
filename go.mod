@@ -1,3 +1,3 @@
-module github.com/cryptogate/go-sdk
+module github.com/CryptoGateHQ/go-sdk
 
 go 1.19
