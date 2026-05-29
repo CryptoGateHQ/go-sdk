@@ -30,6 +30,14 @@ func (s *CryptosService) List(ctx context.Context) (*CryptosResult, error) {
 	return &result, err
 }
 
+// ListMerchant returns only the cryptos this merchant has wallets configured for.
+// Requires a publishable key (pk_live_) — safe to call from browser JS.
+func (s *CryptosService) ListMerchant(ctx context.Context) (*CryptosResult, error) {
+	var result CryptosResult
+	err := s.c.do(ctx, http.MethodGet, "/merchant/cryptos", nil, &result)
+	return &result, err
+}
+
 // PricesService handles exchange rates.
 type PricesService struct{ c *Client }
 
