@@ -13,6 +13,7 @@ type TransactionsService struct{ c *Client }
 type CreateParams struct {
 	Crypto   string  `json:"crypto"`
 	Amount   float64 `json:"amount"`
+	// Currency is the fiat currency for the amount. Supported: USD, PLN, EUR, GBP. Defaults to USD.
 	Currency string  `json:"currency"`
 }
 
@@ -20,10 +21,12 @@ type CreateParams struct {
 type Transaction struct {
 	TXID            string  `json:"txid"`
 	Status          string  `json:"status"`
-	AmountUSD       float64 `json:"amount_usd"`
+	AmountFiat      float64 `json:"amount_fiat"`      // Amount in the fiat currency (Currency field)
+	AmountUSD       float64 `json:"amount_usd"`        // USD equivalent, locked at creation
+	FiatToUSDRate   float64 `json:"fiat_to_usd_rate"`  // Forex rate locked at creation
 	AmountPaid      float64 `json:"amount_paid"`
 	AmountRemaining float64 `json:"amount_remaining"`
-	Currency        string  `json:"currency"`
+	Currency        string  `json:"currency"`          // USD, PLN, EUR, or GBP
 	Payment         Payment `json:"payment"`
 	PaymentURL      string  `json:"payment_url"`
 	ExpiresAt       string  `json:"expires_at"`
@@ -57,6 +60,7 @@ type Pagination struct {
 }
 
 // Create creates a new payment transaction.
+// Supported currencies: USD (default), PLN, EUR, GBP.
 func (s *TransactionsService) Create(ctx context.Context, params CreateParams) (*Transaction, error) {
 	if params.Crypto == "" {
 		return nil, &APIError{Code: "VALIDATION_ERROR", Message: "crypto is required", Status: 400}
@@ -64,7 +68,9 @@ func (s *TransactionsService) Create(ctx context.Context, params CreateParams) (
 	if params.Amount == 0 {
 		return nil, &APIError{Code: "VALIDATION_ERROR", Message: "amount is required", Status: 400}
 	}
-	params.Currency = "USD"
+	if params.Currency == "" {
+		params.Currency = "USD"
+	}
 	var tx Transaction
 	err := s.c.do(ctx, http.MethodPost, "/transactions/create", params, &tx)
 	return &tx, err

@@ -4,8 +4,9 @@
 //
 //	cg := cryptogate.New("sk_live_your_api_key")
 //	tx, err := cg.Transactions.Create(context.Background(), cryptogate.CreateParams{
-//	    Crypto: "BTC",
-//	    Amount: 50.00,
+//	    Crypto:   "BTC",
+//	    Amount:   100.00,
+//	    Currency: "EUR", // optional; defaults to "USD". Supported: USD, PLN, EUR, GBP
 //	})
 package cryptogate
 

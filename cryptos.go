@@ -33,10 +33,10 @@ func (s *CryptosService) List(ctx context.Context) (*CryptosResult, error) {
 // PricesService handles exchange rates.
 type PricesService struct{ c *Client }
 
-// RatesResult holds exchange rate data.
+// RatesResult holds exchange rate data returned by GET /prices.
 type RatesResult struct {
-	Rates     map[string]float64 `json:"rates"`
-	Currency  string             `json:"currency"`
+	Crypto    map[string]float64 `json:"crypto"`     // USD price per coin: {"BTC": 50000, ...}
+	Fiat      map[string]float64 `json:"fiat"`       // USD per fiat unit: {"USD": 1.0, "PLN": 0.25, "EUR": 1.09, "GBP": 1.27}
 	FetchedAt string             `json:"fetched_at"`
 }
 
