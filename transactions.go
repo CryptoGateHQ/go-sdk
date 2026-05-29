@@ -11,10 +11,32 @@ type TransactionsService struct{ c *Client }
 
 // CreateParams are the parameters for creating a transaction.
 type CreateParams struct {
-	Crypto   string  `json:"crypto"`
-	Amount   float64 `json:"amount"`
-	// Currency is the fiat currency for the amount. Supported: USD, PLN, EUR, GBP. Defaults to USD.
-	Currency string  `json:"currency"`
+	Crypto        string            `json:"crypto"`
+	Amount        float64           `json:"amount"`
+	Currency      string            `json:"currency,omitempty"`    // USD (default), PLN, EUR, GBP
+	Metadata      map[string]string `json:"metadata,omitempty"`    // max 20 keys, string values, 4 KB total
+	CustomerEmail string            `json:"customer_email,omitempty"`
+	SuccessURL    string            `json:"success_url,omitempty"`
+	CancelURL     string            `json:"cancel_url,omitempty"`
+}
+
+// CreateDetailedParams are the parameters for creating a detailed transaction (Pro/Enterprise).
+type CreateDetailedParams struct {
+	Crypto        string            `json:"crypto"`
+	Currency      string            `json:"currency,omitempty"`
+	Items         []LineItem        `json:"items"`
+	OrderID       string            `json:"order_id"`              // required
+	Metadata      map[string]string `json:"metadata,omitempty"`
+	CustomerEmail string            `json:"customer_email,omitempty"`
+	SuccessURL    string            `json:"success_url,omitempty"`
+	CancelURL     string            `json:"cancel_url,omitempty"`
+}
+
+// LineItem is a single line item in a detailed transaction.
+type LineItem struct {
+	Name     string  `json:"name"`
+	Quantity int     `json:"quantity"`
+	Price    float64 `json:"price"`
 }
 
 // Transaction represents a CryptoGate payment transaction.
@@ -73,6 +95,26 @@ func (s *TransactionsService) Create(ctx context.Context, params CreateParams) (
 	}
 	var tx Transaction
 	err := s.c.do(ctx, http.MethodPost, "/transactions/create", params, &tx)
+	return &tx, err
+}
+
+// CreateDetailed creates a detailed transaction with line items (Pro/Enterprise plans only).
+// OrderID is required and will be returned in every webhook for automation.
+func (s *TransactionsService) CreateDetailed(ctx context.Context, params CreateDetailedParams) (*Transaction, error) {
+	if params.Crypto == "" {
+		return nil, &APIError{Code: "VALIDATION_ERROR", Message: "crypto is required", Status: 400}
+	}
+	if len(params.Items) == 0 {
+		return nil, &APIError{Code: "VALIDATION_ERROR", Message: "items are required", Status: 400}
+	}
+	if params.OrderID == "" {
+		return nil, &APIError{Code: "VALIDATION_ERROR", Message: "order_id is required", Status: 400}
+	}
+	if params.Currency == "" {
+		params.Currency = "USD"
+	}
+	var tx Transaction
+	err := s.c.do(ctx, http.MethodPost, "/transactions/create-detailed", params, &tx)
 	return &tx, err
 }
 
